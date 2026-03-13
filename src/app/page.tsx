@@ -42,16 +42,16 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ fontFamily: 'Gulim, Arial, sans-serif', fontSize: '12px', color: '#000', backgroundColor: '#fff', padding: '10px' }}>
+    <div style={{ fontFamily: 'Gulim, Arial, sans-serif', fontSize: '12px', color: '#fff', backgroundColor: '#fff', padding: '10px' }}>
       <h3 style={{ fontSize: '14px', margin: '0 0 10px 0', fontWeight: 'normal' }}>업무 참조용 지표 데이터</h3>
       
       {error && !data ? (
         <div>{error}</div>
       ) : data ? (
         <div>
-          <table border={1} cellPadding={4} style={{ borderCollapse: 'collapse', width: '400px', textAlign: 'right' }}>
+          <table cellPadding={4} style={{ borderCollapse: 'collapse', width: '400px', textAlign: 'right', border: '1px solid #fff' }}>
             <thead>
-              <tr style={{ backgroundColor: '#f0f0f0', textAlign: 'center' }}>
+              <tr style={{ backgroundColor: '#fff', textAlign: 'center' }}>
                 <th>구분</th>
                 <th>지표명</th>
                 <th>현재치</th>
@@ -84,7 +84,7 @@ export default function Home() {
               })}
             </tbody>
           </table>
-          <div style={{ marginTop: '5px', color: '#666', fontSize: '11px' }}>
+          <div style={{ marginTop: '5px', color: '#fff', fontSize: '11px' }}>
             갱신시각: {data.updatedAt}
           </div>
         </div>

@@ -6,9 +6,9 @@ const SYMBOLS = [
   { code: '251340', name: 'KODEX 코스닥150선물인버스' }
 ];
 
-async function fetchQuote(symbolCode: string, symbolName: string) {
+async function fetchQuote(symbolCode: string, fallbackName?: string) {
   const url = `https://finance.daum.net/api/quotes/A${symbolCode}`;
-  
+
   const response = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -25,10 +25,12 @@ async function fetchQuote(symbolCode: string, symbolName: string) {
   }
 
   const data = await response.json();
-  
+
+  // Daum API 응답에서 종목명을 직접 가져옴
+  const name = data.name || fallbackName || `종목 ${symbolCode}`;
   const price = data.tradePrice;
   let change = data.changePrice;
-  
+
   if (data.change === 'FALL') {
     change = -Math.abs(change);
   } else if (data.change === 'RISE') {
@@ -45,7 +47,7 @@ async function fetchQuote(symbolCode: string, symbolName: string) {
   }
 
   return {
-    name: symbolName,
+    name: name,
     code: symbolCode,
     price: price,
     change: change,

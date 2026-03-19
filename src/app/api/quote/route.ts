@@ -62,7 +62,11 @@ const CORS_HEADERS = {
 };
 
 export async function OPTIONS() {
-  return new NextResponse(null, { headers: CORS_HEADERS });
+  const res = new NextResponse(null, { status: 204 });
+  res.headers.set('Access-Control-Allow-Origin', '*');
+  res.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.headers.set('Access-Control-Allow-Headers', '*');
+  return res;
 }
 
 export async function GET(request: Request) {
@@ -83,16 +87,22 @@ export async function GET(request: Request) {
     const promises = targetSymbols.map(sym => fetchQuote(sym.code, sym.name));
     const results = await Promise.all(promises);
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       items: results,
       updatedAt: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
-    }, { headers: CORS_HEADERS });
+    });
+    res.headers.set('Access-Control-Allow-Origin', '*');
+    res.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.headers.set('Access-Control-Allow-Headers', '*');
+    return res;
 
   } catch (error: any) {
     console.error('API 호출 실패:', error);
-    return NextResponse.json(
+    const res = NextResponse.json(
       { error: '데이터를 가져오지 못했습니다.', details: error.message },
-      { status: 500, headers: CORS_HEADERS }
+      { status: 500 }
     );
+    res.headers.set('Access-Control-Allow-Origin', '*');
+    return res;
   }
 }

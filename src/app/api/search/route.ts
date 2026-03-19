@@ -23,40 +23,45 @@ export async function GET(request: Request) {
       return res;
     }
 
-    const url = `https://finance.daum.net/api/search/ac?q=${encodeURIComponent(query)}`;
+    const url = `https://m.stock.naver.com/api/search/ac?keyword=${encodeURIComponent(query)}&target=stock`;
 
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Referer': 'https://finance.daum.net/',
-        'Origin': 'https://finance.daum.net',
-        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
       },
       cache: 'no-store',
     });
 
     if (!response.ok) {
-      throw new Error(`Daum Search API 오류: ${response.status}`);
+      throw new Error(`Naver Search API 오류: ${response.status}`);
     }
 
     const data = await response.json();
 
-    // Daum autocomplete API returns data in various formats
-    // Extract stock items from the response
     const results: { name: string; code: string; market: string }[] = [];
 
-    if (data.data) {
-      const items = data.data;
-      for (const item of items) {
-        // Only include Korean stocks (KOSPI, KOSDAQ)
-        if (item.symbolCode && (item.market === 'KOSPI' || item.market === 'KOSDAQ' || item.market === 'KONEX')) {
-          results.push({
-            name: item.name || item.korName || '',
-            code: item.symbolCode.replace(/^A/, ''),
-            market: item.market,
-          });
-        }
+    // Naver stock search API response: { stocks: [...] } or { result: { stock: [...] } }
+    const items = data.stocks || data.result?.stocks || data.result?.stock || [];
+
+    for (const item of items) {
+      const code = item.code || item.itemCode || item.reutersCode?.replace('.KS', '').replace('.KQ', '') || '';
+      const name = item.name || item.stockName || item.korName || '';
+      const marketName = item.market || item.stockExchangeType?.name || '';
+
+      // 국내 주식만 필터링
+      const marketUpper = (typeof marketName === 'string' ? marketName : '').toUpperCase();
+      if (code && name && (marketUpper.includes('KOSPI') || marketUpper.includes('KOSDAQ') || marketUpper.includes('KONEX') || marketUpper === 'STOCK' || marketUpper === '')) {
+        let displayMarket = 'KOSPI';
+        if (marketUpper.includes('KOSDAQ')) displayMarket = 'KOSDAQ';
+        else if (marketUpper.includes('KONEX')) displayMarket = 'KONEX';
+        else if (item.stockExchangeType?.code === 'KOSDAQ') displayMarket = 'KOSDAQ';
+
+        results.push({
+          name,
+          code: code.replace(/^A/, ''),
+          market: displayMarket,
+        });
       }
     }
 

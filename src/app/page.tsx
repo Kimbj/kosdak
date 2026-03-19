@@ -31,7 +31,9 @@ export default function Landing() {
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [codeEditorText, setCodeEditorText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // localStorage에서 선택 종목 복원
@@ -90,6 +92,7 @@ export default function Landing() {
         if (res.ok) {
           const json = await res.json();
           setSearchResults(json.results || []);
+          setHighlightIndex(-1);
         }
       } catch {
         setSearchResults([]);
@@ -200,6 +203,36 @@ export default function Landing() {
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
+            onKeyDown={(e) => {
+              if (!showResults || searchResults.length === 0) return;
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHighlightIndex(prev => {
+                  const next = prev < searchResults.length - 1 ? prev + 1 : 0;
+                  // 스크롤 따라가기
+                  const el = resultsRef.current?.children[next] as HTMLElement;
+                  el?.scrollIntoView({ block: 'nearest' });
+                  return next;
+                });
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHighlightIndex(prev => {
+                  const next = prev > 0 ? prev - 1 : searchResults.length - 1;
+                  const el = resultsRef.current?.children[next] as HTMLElement;
+                  el?.scrollIntoView({ block: 'nearest' });
+                  return next;
+                });
+              } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightIndex >= 0 && highlightIndex < searchResults.length) {
+                  addStock(searchResults[highlightIndex]);
+                  setHighlightIndex(-1);
+                }
+              } else if (e.key === 'Escape') {
+                setShowResults(false);
+                setHighlightIndex(-1);
+              }
+            }}
             placeholder="종목명을 입력하세요 (예: 삼성전자, 카카오)"
             style={{
               width: '100%',
@@ -239,12 +272,15 @@ export default function Landing() {
                   검색 결과가 없습니다
                 </div>
               ) : (
-                searchResults.map((item) => {
+                <div ref={resultsRef}>
+                {searchResults.map((item, idx) => {
                   const alreadySelected = selectedStocks.some(s => s.code === item.code);
+                  const isHighlighted = idx === highlightIndex;
                   return (
                     <div
                       key={item.code}
                       onClick={() => addStock(item)}
+                      onMouseEnter={() => setHighlightIndex(idx)}
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -253,11 +289,8 @@ export default function Landing() {
                         color: alreadySelected ? '#adb5bd' : '#333',
                         borderBottom: '1px solid #f1f3f5',
                         cursor: alreadySelected ? 'default' : 'pointer',
-                        transition: 'background-color 0.15s',
-                        backgroundColor: alreadySelected ? '#f8f9fa' : '#fff',
+                        backgroundColor: isHighlighted ? '#e9ecef' : alreadySelected ? '#f8f9fa' : '#fff',
                       }}
-                      onMouseOver={(e) => { if (!alreadySelected) e.currentTarget.style.backgroundColor = '#e9ecef'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = alreadySelected ? '#f8f9fa' : '#fff'; }}
                     >
                       <div>
                         <span style={{ fontSize: '15px', fontWeight: 600 }}>{item.name}</span>
@@ -281,7 +314,8 @@ export default function Landing() {
                       }}>{item.market}</span>
                     </div>
                   );
-                })
+                })}
+                </div>
               )}
             </div>
           )}

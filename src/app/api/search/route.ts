@@ -11,7 +11,7 @@ function setCors(res: NextResponse) {
   return res;
 }
 
-// 서버 메모리 캐시 (동일 쿼리 재요청 방지)
+// 서버 메모리 캐시
 const cache = new Map<string, { data: unknown; ts: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5분
 
@@ -34,45 +34,41 @@ export async function GET(request: Request) {
       return setCors(NextResponse.json(cached.data));
     }
 
-    // Naver 증권 자동완성 API (JSON, UTF-8)
-    const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock,etf`;
-
+    // Daum 증권 검색 API (종목명 부분매칭 지원, ETF 포함)
+    const url = `https://finance.daum.net/api/search?q=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json',
-        'Referer': 'https://stock.naver.com/',
+        'Referer': 'https://finance.daum.net/',
+        'Origin': 'https://finance.daum.net',
+        'X-Requested-With': 'XMLHttpRequest',
       },
       cache: 'no-store',
     });
 
     if (!response.ok) {
-      throw new Error(`Naver API 오류: ${response.status}`);
+      throw new Error(`Daum API 오류: ${response.status}`);
     }
 
     const data = await response.json();
     const results: { name: string; code: string; market: string }[] = [];
 
-    const items = data.items || [];
-    for (const item of items) {
-      if (item.category !== 'stock' && item.category !== 'etf') continue;
-      const code = (item.code || '').replace(/^A/, '');
-      const name = item.name || '';
+    for (const item of (data.suggestItems || [])) {
+      const code = (item.displayedCode || item.symbolCode || '').replace(/^[AQ]/, '');
+      const name = item.koreanName || '';
       if (!code || !name) continue;
 
-      const typeCode = (item.typeCode || '').toUpperCase();
-      let market = 'KOSPI';
-      if (typeCode.includes('KOSDAQ')) market = 'KOSDAQ';
-      else if (typeCode.includes('KONEX')) market = 'KONEX';
+      // 6자리 숫자 코드만 (ETN 등 제외)
+      if (!/^\d{6}$/.test(code)) continue;
 
-      results.push({ name, code, market });
+      results.push({ name, code, market: '' });
     }
 
     const payload = { results };
 
     // 캐시 저장
     cache.set(query, { data: payload, ts: Date.now() });
-    // 오래된 캐시 정리
     if (cache.size > 500) {
       const now = Date.now();
       for (const [key, val] of cache) {

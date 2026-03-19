@@ -399,15 +399,24 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-            <div style={{
-              padding: '10px 16px',
-              backgroundColor: '#f8f9fa',
-              fontSize: '12px',
-              color: '#868e96',
-              fontFamily: 'monospace',
-              borderTop: '1px solid #f1f3f5',
-            }}>
-              URL: /h?codes={selectedStocks.map(s => s.code).join(',')}
+            <div
+              onClick={() => {
+                const url = `https://kosdak.vercel.app/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
+                navigator.clipboard.writeText(url).catch(() => {});
+              }}
+              style={{
+                padding: '10px 16px',
+                backgroundColor: '#f8f9fa',
+                fontSize: '12px',
+                color: '#4a90d9',
+                fontFamily: 'monospace',
+                borderTop: '1px solid #f1f3f5',
+                cursor: 'pointer',
+                userSelect: 'all',
+              }}
+              title="클릭하면 URL이 복사됩니다"
+            >
+              kosdak.vercel.app/h?codes={selectedStocks.map(s => s.code).join(',')}
             </div>
           </div>
         )}
@@ -458,7 +467,7 @@ export default function Landing() {
             <strong>특정 종목 조회:</strong> URL에 종목코드를 추가하여 원하는 종목을 조회할 수 있습니다.
           </p>
           <p style={{ margin: '0 0 8px 0', fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '8px 12px', borderRadius: '4px' }}>
-            예시: kosdak.vercel.app/h?codes=005930,000660
+            예시: kosdak.vercel.app/h?codes={selectedStocks.length > 0 ? selectedStocks.map(s => s.code).join(',') : '005930,000660'}
           </p>
           <p style={{ margin: 0 }}>
             <strong>자동 갱신:</strong> 시세 데이터는 주기적으로 자동 갱신되어 항상 최신 정보를 제공합니다.

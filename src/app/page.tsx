@@ -178,19 +178,47 @@ export default function Landing() {
       minHeight: '100vh',
     }}>
       {/* 헤더 */}
+      <div style={{ backgroundColor: '#1a2332' }}>
       <header style={{
-        backgroundColor: '#1a2332',
         color: '#fff',
-        padding: '40px 20px',
-        textAlign: 'center',
+        padding: '30px 20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        maxWidth: '800px',
+        margin: '0 auto',
+        boxSizing: 'border-box',
       }}>
-        <h1 style={{ fontSize: '28px', margin: '0 0 10px 0', fontWeight: 700 }}>
-          히든 시세
-        </h1>
-        <p style={{ fontSize: '16px', margin: 0, color: '#adb5bd' }}>
-          국내 상장사시세를 간편하게 확인하세요
-        </p>
+        <div>
+          <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 700 }}>
+            히든 시세
+          </h1>
+          <p style={{ fontSize: '16px', margin: 0, color: '#adb5bd' }}>
+            국내 상장사시세를 간편하게 확인하세요
+          </p>
+        </div>
+        <a
+          href="/download/일일업무현황.zip"
+          download
+          style={{
+            display: 'inline-block',
+            padding: '12px 24px',
+            backgroundColor: '#4a90d9',
+            color: '#fff',
+            fontSize: '13px',
+            fontWeight: 600,
+            borderRadius: '6px',
+            textDecoration: 'none',
+            transition: 'opacity 0.15s',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
+          onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+        >
+          일일업무현황 다운로드
+        </a>
       </header>
+      </div>
 
       {/* 종목 검색 */}
       <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
@@ -474,61 +502,14 @@ export default function Landing() {
           <p style={{ margin: '0 0 8px 0' }}>
             <strong>자동 갱신:</strong> 시세 데이터는 주기적으로 자동 갱신되어 항상 최신 정보를 제공합니다.
           </p>
-          <p style={{ margin: 0 }}>
+          <p style={{ margin: '0 0 8px 0' }}>
             <strong>시세 보기:</strong> 시세 조회 페이지 이동 후 <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>Ctrl + A</span>로 전체 선택하면 셀 색상이 적용되어 보기 편합니다.
           </p>
-        </div>
-      </section>
-
-      {/* 프로그램 다운로드 */}
-      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
-          프로그램 다운로드
-        </h2>
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '8px',
-          padding: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.8', margin: '0 0 16px 0' }}>
-            일일업무현황 프로그램을 설치하면 바탕화면에서 바로 시세를 확인할 수 있습니다.
+          <p style={{ margin: 0 }}>
+            <strong>프로그램 단축키:</strong>{' '}
+            <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>A</span> 주식 시세 표시 /{' '}
+            <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>I</span> 종목 코드 입력
           </p>
-          <div style={{
-            backgroundColor: '#f8f9fa',
-            borderRadius: '6px',
-            padding: '16px',
-            marginBottom: '20px',
-            fontSize: '14px',
-            lineHeight: '2',
-            color: '#555',
-          }}>
-            <p style={{ margin: '0 0 4px 0' }}>
-              <span style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 8px', borderRadius: '3px', fontWeight: 600 }}>A</span> 키 : 주식 시세 정보 표시
-            </p>
-            <p style={{ margin: 0 }}>
-              <span style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 8px', borderRadius: '3px', fontWeight: 600 }}>I</span> 키 : 종목 코드 입력/편집
-            </p>
-          </div>
-          <a
-            href="/download/일일업무현황.exe"
-            download
-            style={{
-              display: 'inline-block',
-              padding: '12px 28px',
-              backgroundColor: '#1a2332',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: 600,
-              borderRadius: '6px',
-              textDecoration: 'none',
-              transition: 'opacity 0.15s',
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
-          >
-            일일업무현황.exe 다운로드
-          </a>
         </div>
       </section>
 

@@ -505,25 +505,82 @@ export default function Landing() {
         <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
           사용 방법
         </h2>
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '8px',
-          padding: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          fontSize: '14px',
-          lineHeight: '2',
-          color: '#555',
-        }}>
-            <p>
-                [웹 사용]
-                - 모니터링 하고 싶은 종목을 선택 후 <strong>시세 조회</strong>를 눌러주세요. 
-                - 빈 페이지로 보이지만 <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>Ctrl + A</span>를 누르면 색상이 반전되어 시세가 보입니다. <br />
-                [프로그램 사용]
-                - 웹에서 <strong>코드 복사</strong>를 누른뒤 다운로드 프로그램에서 `I`를 누른 후 붙여넣기(Ctrl + V) 하면 종목이 입력됩니다.
-                - 프로그램에서 `A`를 누르면 시세를 보실수 있습니다.
-                - 노출 된 시세는 5초 뒤 사라집니다.
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          {/* 웹 사용 */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '10px',
+            padding: '24px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            borderTop: '3px solid #4a90d9',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '8px',
+                background: 'linear-gradient(135deg, #4a90d9, #357abd)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1a2332' }}>웹 사용</h3>
+            </div>
+            <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.9' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>1.</span>
+                <span>모니터링 하고 싶은 종목을 검색하여 선택합니다.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>2.</span>
+                <span><strong style={{ color: '#1a2332' }}>시세 조회</strong> 버튼을 눌러 이동합니다.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>3.</span>
+                <span>빈 페이지로 보이지만 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>Ctrl + A</kbd>를 누르면 시세가 보입니다.</span>
+              </div>
+            </div>
+          </div>
 
-            </p>
+          {/* 프로그램 사용 */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '10px',
+            padding: '24px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            borderTop: '3px solid #1a2332',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <div style={{
+                width: '36px', height: '36px', borderRadius: '8px',
+                background: 'linear-gradient(135deg, #495057, #343a40)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </div>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1a2332' }}>프로그램 사용</h3>
+            </div>
+            <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.9' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>1.</span>
+                <span>웹에서 <strong style={{ color: '#1a2332' }}>코드 복사</strong>를 누릅니다.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>2.</span>
+                <span>프로그램에서 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>I</kbd> 키를 누른 후 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>Ctrl + V</kbd>로 붙여넣기 합니다.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>3.</span>
+                <span><kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>A</kbd> 키를 누르면 시세가 표시됩니다.</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>4.</span>
+                <span>노출된 시세는 5초 뒤 자동으로 사라집니다.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

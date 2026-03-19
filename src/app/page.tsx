@@ -25,14 +25,14 @@ export default function Landing() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [allStocks, setAllStocks] = useState<SearchResult[]>([]);
+  const [stocksLoading, setStocksLoading] = useState(true);
   const [selectedStocks, setSelectedStocks] = useState<SearchResult[]>([]);
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [codeEditorText, setCodeEditorText] = useState('');
   const [copied, setCopied] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // localStorage에서 선택 종목 복원
   useEffect(() => {
@@ -54,6 +54,39 @@ export default function Landing() {
     } catch {}
   }, [selectedStocks]);
 
+  // 전체 종목 리스트를 한 번만 로드 (sessionStorage 캐시)
+  useEffect(() => {
+    const loadStocks = async () => {
+      try {
+        const cached = sessionStorage.getItem('allStocks');
+        if (cached) {
+          const { stocks, ts } = JSON.parse(cached);
+          // 1시간 이내면 캐시 사용
+          if (Date.now() - ts < 60 * 60 * 1000 && Array.isArray(stocks) && stocks.length > 0) {
+            setAllStocks(stocks);
+            setStocksLoading(false);
+            return;
+          }
+        }
+      } catch {}
+
+      try {
+        const res = await fetch('/api/stocks');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.stocks?.length > 0) {
+            setAllStocks(json.stocks);
+            try {
+              sessionStorage.setItem('allStocks', JSON.stringify({ stocks: json.stocks, ts: Date.now() }));
+            } catch {}
+          }
+        }
+      } catch {}
+      setStocksLoading(false);
+    };
+    loadStocks();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -69,33 +102,24 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, []);
 
+  // 로컬 필터링 (API 호출 없음)
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const q = query.trim();
 
-    if (!query.trim()) {
+    if (!q) {
       setSearchResults([]);
       setShowResults(false);
       return;
     }
 
-    setIsSearching(true);
     setShowResults(true);
-
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
-        if (res.ok) {
-          const json = await res.json();
-          setSearchResults(json.results || []);
-        }
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-  }, []);
+    const lower = q.toLowerCase();
+    const filtered = allStocks.filter(s =>
+      s.name.toLowerCase().includes(lower) || s.code.includes(q)
+    ).slice(0, 20);
+    setSearchResults(filtered);
+  }, [allStocks]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -198,7 +222,7 @@ export default function Landing() {
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
-            placeholder="종목명을 입력하세요 (예: 삼성전자, 카카오)"
+            placeholder={stocksLoading ? '종목 리스트 로딩 중...' : '종목명 또는 코드를 입력하세요 (예: 삼성전자, 005930)'}
             style={{
               width: '100%',
               padding: '14px 16px',
@@ -228,11 +252,7 @@ export default function Landing() {
               border: '1px solid #dee2e6',
               borderTop: 'none',
             }}>
-              {isSearching ? (
-                <div style={{ padding: '16px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
-                  검색 중...
-                </div>
-              ) : searchResults.length === 0 ? (
+              {searchResults.length === 0 ? (
                 <div style={{ padding: '16px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
                   검색 결과가 없습니다
                 </div>

@@ -55,6 +55,16 @@ async function fetchQuote(symbolCode: string, fallbackName?: string) {
   };
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': '*',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { headers: CORS_HEADERS });
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -76,13 +86,13 @@ export async function GET(request: Request) {
     return NextResponse.json({
       items: results,
       updatedAt: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
-    });
+    }, { headers: CORS_HEADERS });
 
   } catch (error: any) {
     console.error('API 호출 실패:', error);
     return NextResponse.json(
       { error: '데이터를 가져오지 못했습니다.', details: error.message },
-      { status: 500 }
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 }

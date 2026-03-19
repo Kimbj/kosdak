@@ -480,6 +480,58 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* 프로그램 다운로드 */}
+      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
+        <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
+          프로그램 다운로드
+        </h2>
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          padding: '24px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        }}>
+          <p style={{ fontSize: '14px', color: '#555', lineHeight: '1.8', margin: '0 0 16px 0' }}>
+            일일업무현황 프로그램을 설치하면 바탕화면에서 바로 시세를 확인할 수 있습니다.
+          </p>
+          <div style={{
+            backgroundColor: '#f8f9fa',
+            borderRadius: '6px',
+            padding: '16px',
+            marginBottom: '20px',
+            fontSize: '14px',
+            lineHeight: '2',
+            color: '#555',
+          }}>
+            <p style={{ margin: '0 0 4px 0' }}>
+              <span style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 8px', borderRadius: '3px', fontWeight: 600 }}>A</span> 키 : 주식 시세 정보 표시
+            </p>
+            <p style={{ margin: 0 }}>
+              <span style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 8px', borderRadius: '3px', fontWeight: 600 }}>I</span> 키 : 종목 코드 입력/편집
+            </p>
+          </div>
+          <a
+            href="/download/일일업무현황.exe"
+            download
+            style={{
+              display: 'inline-block',
+              padding: '12px 28px',
+              backgroundColor: '#1a2332',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 600,
+              borderRadius: '6px',
+              textDecoration: 'none',
+              transition: 'opacity 0.15s',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
+            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            일일업무현황.exe 다운로드
+          </a>
+        </div>
+      </section>
+
       {/* 푸터 */}
       <footer style={{
         textAlign: 'center',

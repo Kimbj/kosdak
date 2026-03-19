@@ -195,7 +195,7 @@ export default function Landing() {
             히든 시세
           </h1>
           <p style={{ fontSize: '16px', margin: 0, color: '#adb5bd' }}>
-            국내 상장사시세를 간편하게 확인하세요
+            국내 상장사시세를 몰래 확인하세요
           </p>
         </div>
         <a
@@ -594,6 +594,13 @@ export default function Landing() {
       }}>
         <p style={{ margin: 0 }}>투자에 대한 책임은 본인에게 있습니다.</p>
         <p style={{ margin: '5px 0 0 0' }}>데이터 출처: Daum Finance</p>
+        <p style={{ margin: '12px 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
+          </svg>
+          <span>문의사항:</span>
+          <a href="mailto:applecubic3@gmail.com" style={{ color: '#4a90d9', textDecoration: 'none' }}>applecubic3@gmail.com</a>
+        </p>
       </footer>
 
       {/* 코드 편집 모달 */}

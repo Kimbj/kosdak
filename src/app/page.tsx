@@ -469,8 +469,11 @@ export default function Landing() {
           <p style={{ margin: '0 0 8px 0', fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '8px 12px', borderRadius: '4px' }}>
             예시: kosdak.vercel.app/h?codes={selectedStocks.length > 0 ? selectedStocks.map(s => s.code).join(',') : '005930,000660'}
           </p>
-          <p style={{ margin: 0 }}>
+          <p style={{ margin: '0 0 8px 0' }}>
             <strong>자동 갱신:</strong> 시세 데이터는 주기적으로 자동 갱신되어 항상 최신 정보를 제공합니다.
+          </p>
+          <p style={{ margin: 0 }}>
+            <strong>시세 보기:</strong> 시세 조회 페이지 이동 후 <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>Ctrl + A</span>로 전체 선택하면 셀 색상이 적용되어 보기 편합니다.
           </p>
         </div>
       </section>

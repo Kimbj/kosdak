@@ -457,7 +457,12 @@ export default function Landing() {
             justifyContent: 'center',
             zIndex: 1000,
           }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowCodeEditor(false); }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDivElement).dataset.bg = '1'; }}
+          onMouseUp={(e) => {
+            const el = e.currentTarget as HTMLDivElement;
+            if (e.target === e.currentTarget && el.dataset.bg === '1') setShowCodeEditor(false);
+            delete el.dataset.bg;
+          }}
         >
           <div style={{
             backgroundColor: '#fff',

@@ -159,13 +159,14 @@ export default function Landing() {
   };
 
   const btnBase: React.CSSProperties = {
-    padding: '8px 16px',
+    padding: '9px 18px',
     fontSize: '13px',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontWeight: 600,
-    transition: 'opacity 0.15s',
+    transition: 'transform 0.12s, box-shadow 0.12s',
+    letterSpacing: '0.3px',
   };
 
   return (
@@ -201,20 +202,28 @@ export default function Landing() {
           href="/download/일일업무현황.zip"
           download
           style={{
-            display: 'inline-block',
-            padding: '12px 24px',
-            backgroundColor: '#4a90d9',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '16px 28px',
+            background: 'linear-gradient(135deg, #4a90d9, #357abd)',
             color: '#fff',
-            fontSize: '13px',
+            fontSize: '14px',
             fontWeight: 600,
-            borderRadius: '6px',
+            borderRadius: '10px',
             textDecoration: 'none',
-            transition: 'opacity 0.15s',
+            transition: 'transform 0.15s, box-shadow 0.15s',
             whiteSpace: 'nowrap',
+            boxShadow: '0 4px 12px rgba(74,144,217,0.3)',
           }}
-          onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
-          onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(74,144,217,0.4)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.3)'; }}
         >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
           일일업무현황 다운로드
         </a>
       </header>
@@ -372,13 +381,28 @@ export default function Landing() {
                 선택 종목 ({selectedStocks.length}개)
               </span>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={openCodeEditor} style={{ ...btnBase, backgroundColor: '#495057', color: '#fff' }}>
+                <button
+                  onClick={openCodeEditor}
+                  style={{ ...btnBase, background: 'linear-gradient(135deg, #495057, #343a40)', color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)'; }}
+                >
                   코드 편집
                 </button>
-                <button onClick={copyCodeList} style={{ ...btnBase, backgroundColor: '#868e96', color: '#fff' }}>
+                <button
+                  onClick={copyCodeList}
+                  style={{ ...btnBase, background: 'linear-gradient(135deg, #868e96, #6c757d)', color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.12)' }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.18)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)'; }}
+                >
                   {copied ? '복사됨!' : '코드 복사'}
                 </button>
-                <button onClick={viewQuotes} style={{ ...btnBase, backgroundColor: '#4a90d9', color: '#fff' }}>
+                <button
+                  onClick={viewQuotes}
+                  style={{ ...btnBase, background: 'linear-gradient(135deg, #4a90d9, #357abd)', color: '#fff', boxShadow: '0 2px 8px rgba(74,144,217,0.3)' }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.4)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,144,217,0.3)'; }}
+                >
                   시세 조회
                 </button>
               </div>
@@ -490,26 +514,16 @@ export default function Landing() {
           lineHeight: '2',
           color: '#555',
         }}>
-          <p style={{ margin: '0 0 8px 0' }}>
-            <strong>기본 시세 조회:</strong> 페이지에 접속하면 주요 코스닥 ETF 시세가 자동으로 표시됩니다.
-          </p>
-          <p style={{ margin: '0 0 8px 0' }}>
-            <strong>특정 종목 조회:</strong> URL에 종목코드를 추가하여 원하는 종목을 조회할 수 있습니다.
-          </p>
-          <p style={{ margin: '0 0 8px 0', fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '8px 12px', borderRadius: '4px' }}>
-            예시: kosdak.vercel.app/h?codes={selectedStocks.length > 0 ? selectedStocks.map(s => s.code).join(',') : '005930,000660'}
-          </p>
-          <p style={{ margin: '0 0 8px 0' }}>
-            <strong>자동 갱신:</strong> 시세 데이터는 주기적으로 자동 갱신되어 항상 최신 정보를 제공합니다.
-          </p>
-          <p style={{ margin: '0 0 8px 0' }}>
-            <strong>시세 보기:</strong> 시세 조회 페이지 이동 후 <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>Ctrl + A</span>로 전체 선택하면 셀 색상이 적용되어 보기 편합니다.
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>프로그램 단축키:</strong>{' '}
-            <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>A</span> 주식 시세 표시 /{' '}
-            <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>I</span> 종목 코드 입력
-          </p>
+            <p>
+                [웹 사용]
+                - 모니터링 하고 싶은 종목을 선택 후 <strong>시세 조회</strong>를 눌러주세요. 
+                - 빈 페이지로 보이지만 <span style={{ fontFamily: 'monospace', backgroundColor: '#f1f3f5', padding: '2px 6px', borderRadius: '3px' }}>Ctrl + A</span>를 누르면 색상이 반전되어 시세가 보입니다. <br />
+                [프로그램 사용]
+                - 웹에서 <strong>코드 복사</strong>를 누른뒤 다운로드 프로그램에서 `I`를 누른 후 붙여넣기(Ctrl + V) 하면 종목이 입력됩니다.
+                - 프로그램에서 `A`를 누르면 시세를 보실수 있습니다.
+                - 노출 된 시세는 5초 뒤 사라집니다.
+
+            </p>
         </div>
       </section>
 
@@ -521,7 +535,7 @@ export default function Landing() {
         fontSize: '12px',
         marginTop: '40px',
       }}>
-        <p style={{ margin: 0 }}>KOSDAK &copy; {new Date().getFullYear()} | 투자에 대한 책임은 본인에게 있습니다.</p>
+        <p style={{ margin: 0 }}>투자에 대한 책임은 본인에게 있습니다.</p>
         <p style={{ margin: '5px 0 0 0' }}>데이터 출처: Daum Finance</p>
       </footer>
 
@@ -603,12 +617,16 @@ export default function Landing() {
                   color: '#495057',
                   border: '1px solid #dee2e6',
                 }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
               >
                 취소
               </button>
               <button
                 onClick={saveCodeEditor}
-                style={{ ...btnBase, backgroundColor: '#4a90d9', color: '#fff' }}
+                style={{ ...btnBase, background: 'linear-gradient(135deg, #4a90d9, #357abd)', color: '#fff', boxShadow: '0 2px 8px rgba(74,144,217,0.3)' }}
+                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.4)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,144,217,0.3)'; }}
               >
                 저장
               </button>

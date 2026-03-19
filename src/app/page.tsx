@@ -34,6 +34,26 @@ export default function Landing() {
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // localStorage에서 선택 종목 복원
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('selectedStocks');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedStocks(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // 선택 종목 변경 시 localStorage에 저장
+  useEffect(() => {
+    try {
+      localStorage.setItem('selectedStocks', JSON.stringify(selectedStocks));
+    } catch {}
+  }, [selectedStocks]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -101,7 +121,7 @@ export default function Landing() {
   };
 
   const copyCodeList = async () => {
-    const text = selectedStocks.map(s => s.code).join(',');
+    const text = selectedStocks.map(s => s.code).join('\n');
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);

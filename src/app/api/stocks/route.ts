@@ -6,7 +6,7 @@ interface StockItem {
   market: string;
 }
 
-// 서버 메모리 캐시 (serverless cold start 시 초기화됨)
+// 서버 메모리 캐시
 let cachedStocks: StockItem[] | null = null;
 let cacheTime = 0;
 const CACHE_TTL = 6 * 60 * 60 * 1000; // 6시간
@@ -26,7 +26,32 @@ export async function OPTIONS() {
   return setCors(new NextResponse(null, { status: 204 }));
 }
 
-async function fetchMarket(mktId: string): Promise<StockItem[]> {
+// 한글 초성/중성/종성으로 검색할 수 있도록 자모를 포함한 종목 리스트
+// Naver 자동완성 API를 활용해 가~힣까지 주요 초성으로 전체 종목 수집
+async function fetchFromNaver(query: string): Promise<StockItem[]> {
+  const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock`;
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'application/json',
+      'Referer': 'https://stock.naver.com/',
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return [];
+  const data = await response.json();
+  const items = data.items || [];
+  return items
+    .filter((item: Record<string, string>) => item.category === 'stock')
+    .map((item: Record<string, string>) => ({
+      name: item.name || '',
+      code: (item.code || '').replace(/^A/, ''),
+      market: (item.typeCode || '').toUpperCase().includes('KOSDAQ') ? 'KOSDAQ' : 'KOSPI',
+    }))
+    .filter((s: StockItem) => s.name && s.code);
+}
+
+async function fetchFromKRX(mktId: string, market: string): Promise<StockItem[]> {
   const body = new URLSearchParams({
     bld: 'dbms/MDC/STAT/standard/MDCSTAT01901',
     locale: 'ko_KR',
@@ -35,21 +60,21 @@ async function fetchMarket(mktId: string): Promise<StockItem[]> {
     csvxls_isNo: 'false',
   });
 
-  const response = await fetch('http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd', {
+  const response = await fetch('https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd', {
     method: 'POST',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101',
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'Referer': 'https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101',
+      'Accept': 'application/json, text/javascript, */*; q=0.01',
     },
     body: body.toString(),
     cache: 'no-store',
   });
 
-  if (!response.ok) throw new Error(`KRX API ${mktId}: ${response.status}`);
+  if (!response.ok) throw new Error(`KRX ${mktId}: ${response.status}`);
   const data = await response.json();
 
-  const market = mktId === 'STK' ? 'KOSPI' : 'KOSDAQ';
   return (data.OutBlock_1 || []).map((item: Record<string, string>) => ({
     name: item.ISU_ABBRV || '',
     code: item.ISU_SRT_CD || '',
@@ -62,14 +87,43 @@ async function getAllStocks(): Promise<StockItem[]> {
     return cachedStocks;
   }
 
-  const [kospi, kosdaq] = await Promise.all([
-    fetchMarket('STK'),
-    fetchMarket('KSQ'),
-  ]);
+  // 방법 1: KRX에서 전체 리스트 (https)
+  try {
+    const [kospi, kosdaq] = await Promise.all([
+      fetchFromKRX('STK', 'KOSPI'),
+      fetchFromKRX('KSQ', 'KOSDAQ'),
+    ]);
+    if (kospi.length > 0 || kosdaq.length > 0) {
+      cachedStocks = [...kospi, ...kosdaq];
+      cacheTime = Date.now();
+      return cachedStocks;
+    }
+  } catch (e) {
+    console.error('KRX fetch failed:', e);
+  }
 
-  cachedStocks = [...kospi, ...kosdaq];
-  cacheTime = Date.now();
-  return cachedStocks;
+  // 방법 2: Naver에서 초성별로 수집
+  const initials = [
+    'ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ',
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+    '1','2','3','4','5','6','7','8','9','0',
+  ];
+
+  const allResults = await Promise.all(initials.map(ch => fetchFromNaver(ch)));
+  const stockMap = new Map<string, StockItem>();
+  for (const list of allResults) {
+    for (const s of list) {
+      if (!stockMap.has(s.code)) stockMap.set(s.code, s);
+    }
+  }
+
+  if (stockMap.size > 0) {
+    cachedStocks = Array.from(stockMap.values());
+    cacheTime = Date.now();
+    return cachedStocks;
+  }
+
+  throw new Error('모든 데이터 소스에서 종목 리스트를 가져오지 못했습니다.');
 }
 
 export async function GET() {
@@ -79,9 +133,7 @@ export async function GET() {
     const res = setCors(NextResponse.json({
       stocks,
       count: stocks.length,
-      cachedAt: new Date(cacheTime).toISOString(),
     }));
-    // 클라이언트 캐시: 1시간
     res.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
     return res;
   } catch (error: any) {

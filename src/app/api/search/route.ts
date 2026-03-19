@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     }
 
     // Naver 증권 자동완성 API (JSON, UTF-8)
-    const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock`;
+    const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock,etf`;
 
     const response = await fetch(url, {
       headers: {
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     const items = data.items || [];
     for (const item of items) {
-      if (item.category !== 'stock') continue;
+      if (item.category !== 'stock' && item.category !== 'etf') continue;
       const code = (item.code || '').replace(/^A/, '');
       const name = item.name || '';
       if (!code || !name) continue;

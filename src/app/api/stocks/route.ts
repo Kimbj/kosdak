@@ -26,62 +26,104 @@ export async function OPTIONS() {
   return setCors(new NextResponse(null, { status: 204 }));
 }
 
-async function fetchFromKRX(): Promise<StockItem[]> {
-  // KRX 전종목 기본정보 API (KOSPI + KOSDAQ 한 번에)
-  const body = new URLSearchParams({
-    bld: 'dbms/MDC/STAT/standard/MDCSTAT01901',
-    locale: 'ko_KR',
-    mktId: 'ALL',
-    share: '1',
-    csvxls_isNo: 'false',
-  });
+async function fetchNaverMarketStocks(market: 'KOSPI' | 'KOSDAQ'): Promise<StockItem[]> {
+  // Naver 증권 전종목 시세 페이지 API (페이지네이션)
+  const sosok = market === 'KOSPI' ? '0' : '1';
+  const stocks: StockItem[] = [];
+  let page = 1;
 
-  const response = await fetch('https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd', {
-    method: 'POST',
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'Referer': 'https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101',
-      'Accept': 'application/json, text/javascript, */*; q=0.01',
-      'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-      'X-Requested-With': 'XMLHttpRequest',
-      'Origin': 'https://data.krx.co.kr',
-    },
-    body: body.toString(),
-    cache: 'no-store',
-  });
+  while (true) {
+    const url = `https://m.stock.naver.com/api/stocks/marketValue/${market}?page=${page}&pageSize=100`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
 
-  if (!response.ok) throw new Error(`KRX: ${response.status}`);
-  const data = await response.json();
+    if (!res.ok) break;
+    const data = await res.json();
+    const items = data.stocks || [];
+    if (items.length === 0) break;
 
-  return (data.OutBlock_1 || []).map((item: Record<string, string>) => ({
-    name: item.ISU_ABBRV || '',
-    code: item.ISU_SRT_CD || '',
-    market: item.MKT_NM === '코스닥' || item.MKT_NM === 'KOSDAQ' ? 'KOSDAQ' : 'KOSPI',
-  })).filter((s: StockItem) => s.name && s.code && /^\d{6}$/.test(s.code));
+    for (const item of items) {
+      const code = (item.stockCode || item.itemCode || item.code || '').replace(/^A/, '');
+      const name = item.stockName || item.itemName || item.name || '';
+      if (code && name && /^\d{6}$/.test(code)) {
+        stocks.push({ name, code, market });
+      }
+    }
+
+    if (!data.hasNext && items.length < 100) break;
+    page++;
+    if (page > 50) break; // 안전장치
+  }
+
+  return stocks;
 }
 
-async function fetchFromNaverBulk(): Promise<StockItem[]> {
-  // Naver 초성/알파벳별 수집 (fallback)
+async function fetchNaverStockList(market: 'KOSPI' | 'KOSDAQ'): Promise<StockItem[]> {
+  // Naver 증권 전종목 리스트 (금융 데이터)
+  const sosok = market === 'KOSPI' ? '0' : '1';
+  const stocks: StockItem[] = [];
+  let page = 1;
+
+  while (true) {
+    const url = `https://finance.naver.com/sise/sise_market_sum.naver?sosok=${sosok}&page=${page}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) break;
+    const html = await res.text();
+
+    // HTML에서 종목코드와 이름 추출
+    const regex = /\/item\/main\.naver\?code=(\d{6})[^>]*>([^<]+)</g;
+    let match;
+    let found = 0;
+    while ((match = regex.exec(html)) !== null) {
+      const code = match[1];
+      const name = match[2].trim();
+      if (code && name) {
+        stocks.push({ name, code, market });
+        found++;
+      }
+    }
+
+    if (found === 0) break;
+    page++;
+    if (page > 50) break;
+  }
+
+  return stocks;
+}
+
+async function fetchFromNaverAC(): Promise<StockItem[]> {
+  // Naver 자동완성 fallback (가장 마지막 수단)
   const queries = [
-    ...['가','나','다','라','마','바','사','아','자','차','카','타','파','하'],
-    ...['강','건','경','계','고','공','광','구','국','금','기'],
-    ...['남','녹','농','누','뉴'],
-    ...['대','더','데','도','동','두','디'],
-    ...['라이','러','레','로','롯','루','리'],
-    ...['만','매','메','모','무','미'],
-    ...['백','범','보','부','비'],
-    ...['삼','상','서','선','성','세','소','솔','수','스','시','신'],
-    ...['에','엔','엘','영','오','우','원','유','은','이','인','일'],
-    ...['제','조','지','진'],
-    ...['카카','케','코','크','큐','키'],
-    ...['태','텔','토','티'],
-    ...['파라','팜','포','풀','피'],
-    ...['한','해','현','호','화','효','휴'],
-    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+    ...['가','각','간','갈','감','강','개','거','건','검','게','겔','경','계','고','곡','골','공','과','관','광','교','구','국','군','굿','궁','권','글','금','기','긴','길','김'],
+    ...['나','남','내','넥','네이','녹','농','놀','누','뉴','니'],
+    ...['다','단','달','담','대','더','덕','데','도','동','두','드','디'],
+    ...['라','라이','라인','락','란','랜','러','레','로','록','롤','롯','루','류','르','리','린'],
+    ...['마','만','말','매','맥','머','메','멜','명','모','목','무','문','물','미','민','밀'],
+    ...['바','박','반','발','방','배','백','버','범','베','벡','벨','병','보','복','봉','부','북','비','빅','빌','빛'],
+    ...['사','삼','상','새','샘','생','서','석','선','설','성','세','셀','소','솔','송','수','숙','순','슈','스','슬','시','신','실','싸','쌍'],
+    ...['아','안','알','암','애','앤','앱','야','양','어','에','엑','엔','엘','엠','여','연','영','예','오','옥','온','올','와','완','왕','외','요','용','우','운','울','원','웅','웰','웹','위','유','율','윤','은','을','음','의','이','인','일','잇','잉'],
+    ...['자','잔','잡','장','재','저','전','절','점','정','제','조','종','주','중','즐','지','진','질'],
+    ...['차','참','창','채','천','첨','청','체','초','총','추','충','치','칩'],
+    ...['카','카카','칸','캐','캔','커','컬','컴','케','켐','코','콘','콜','콤','쿠','퀀','퀄','큐','크','클','키','킨','킴'],
+    ...['타','탄','태','택','터','테','텍','텔','토','톱','통','투','트','특','티'],
+    ...['파','판','팜','패','팩','퍼','페','펄','펜','펫','평','포','폴','표','푸','풀','풍','프','피','핀','필','핏'],
+    ...['하','한','할','함','합','항','해','핵','햇','행','향','허','헌','헬','현','형','혜','호','홈','홍','화','환','황','효','후','훈','휘','휴','흥','희','히'],
+    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').flatMap(c => [c, c+'A', c+'E', c+'I', c+'O', c+'U', c+'R', c+'S', c+'T', c+'N']),
+    ...'0123456789'.split(''),
   ];
 
-  const batchSize = 10;
+  const batchSize = 15;
   const stockMap = new Map<string, StockItem>();
 
   for (let i = 0; i < queries.length; i += batchSize) {
@@ -125,27 +167,30 @@ async function getAllStocks(): Promise<StockItem[]> {
     return cachedStocks;
   }
 
-  // 방법 1: KRX 전종목
+  // 방법 1: Naver 증권 시가총액 페이지 파싱
   try {
-    const stocks = await fetchFromKRX();
-    if (stocks.length > 100) {
-      cachedStocks = stocks;
+    const [kospi, kosdaq] = await Promise.all([
+      fetchNaverStockList('KOSPI'),
+      fetchNaverStockList('KOSDAQ'),
+    ]);
+    if (kospi.length + kosdaq.length > 500) {
+      cachedStocks = [...kospi, ...kosdaq];
       cacheTime = Date.now();
       return cachedStocks;
     }
   } catch (e) {
-    console.error('KRX fetch failed:', e);
+    console.error('Naver stock list failed:', e);
   }
 
-  // 방법 2: Naver 대량 수집
-  const stocks = await fetchFromNaverBulk();
+  // 방법 2: Naver 자동완성 대량 수집
+  const stocks = await fetchFromNaverAC();
   if (stocks.length > 0) {
     cachedStocks = stocks;
     cacheTime = Date.now();
     return cachedStocks;
   }
 
-  throw new Error('모든 데이터 소스에서 종목 리스트를 가져오지 못했습니다.');
+  throw new Error('종목 리스트를 가져오지 못했습니다.');
 }
 
 export async function GET() {

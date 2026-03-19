@@ -304,14 +304,16 @@ export default function Landing() {
                           <span style={{ marginLeft: '8px', fontSize: '12px', color: '#adb5bd' }}>추가됨</span>
                         )}
                       </div>
-                      <span style={{
-                        fontSize: '12px',
-                        color: '#fff',
-                        backgroundColor: item.market === 'KOSPI' ? '#4a90d9' : '#e67e22',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontWeight: 500,
-                      }}>{item.market}</span>
+                      {item.market && (
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#fff',
+                          backgroundColor: item.market === 'KOSPI' ? '#4a90d9' : '#e67e22',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontWeight: 500,
+                        }}>{item.market}</span>
+                      )}
                     </div>
                   );
                 })}

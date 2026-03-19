@@ -11,6 +11,10 @@ function setCors(res: NextResponse) {
   return res;
 }
 
+// 서버 메모리 캐시 (동일 쿼리 재요청 방지)
+const cache = new Map<string, { data: unknown; ts: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5분
+
 export async function OPTIONS() {
   return setCors(new NextResponse(null, { status: 204 }));
 }
@@ -24,8 +28,14 @@ export async function GET(request: Request) {
       return setCors(NextResponse.json({ results: [] }));
     }
 
-    // Naver 증권 자동완성 API
-    const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=index,stock,marketindicator`;
+    // 캐시 확인
+    const cached = cache.get(query);
+    if (cached && Date.now() - cached.ts < CACHE_TTL) {
+      return setCors(NextResponse.json(cached.data));
+    }
+
+    // Naver 증권 자동완성 API (JSON, UTF-8)
+    const url = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock`;
 
     const response = await fetch(url, {
       headers: {
@@ -43,7 +53,6 @@ export async function GET(request: Request) {
     const data = await response.json();
     const results: { name: string; code: string; market: string }[] = [];
 
-    // 응답: { query, items: [{ code, name, typeCode, typeName, category, ... }] }
     const items = data.items || [];
     for (const item of items) {
       if (item.category !== 'stock') continue;
@@ -59,7 +68,19 @@ export async function GET(request: Request) {
       results.push({ name, code, market });
     }
 
-    return setCors(NextResponse.json({ results }));
+    const payload = { results };
+
+    // 캐시 저장
+    cache.set(query, { data: payload, ts: Date.now() });
+    // 오래된 캐시 정리
+    if (cache.size > 500) {
+      const now = Date.now();
+      for (const [key, val] of cache) {
+        if (now - val.ts > CACHE_TTL) cache.delete(key);
+      }
+    }
+
+    return setCors(NextResponse.json(payload));
   } catch (error: any) {
     console.error('검색 API 호출 실패:', error);
     return setCors(NextResponse.json(

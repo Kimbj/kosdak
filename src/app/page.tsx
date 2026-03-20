@@ -171,7 +171,6 @@ export default function Landing() {
 
   return (
     <div style={{
-      fontFamily: "'Malgun Gothic', 'Noto Sans KR', sans-serif",
       margin: 0,
       padding: 0,
       backgroundColor: '#f8f9fa',
@@ -582,6 +581,23 @@ export default function Landing() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* 광고 */}
+      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
+        <ins
+          className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+          data-ad-slot="XXXXXXXXXX"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
+          }}
+        />
       </section>
 
       {/* 푸터 */}

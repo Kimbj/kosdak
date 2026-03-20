@@ -42,7 +42,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ fontFamily: "'Malgun Gothic', 'Noto Sans KR', sans-serif", fontSize: '13px', color: '#fff', backgroundColor: '#fff', padding: '10px', overflow: 'hidden', minHeight: '100vh' }}>
+    <div style={{ fontSize: '13px', color: '#fff', backgroundColor: '#fff', padding: '10px', overflow: 'hidden', minHeight: '100vh' }}>
       <h3 style={{ fontSize: '15px', margin: '0 0 10px 0', fontWeight: 'normal' }}>업무 참조용 지표 데이터</h3>
       
       {error && !data ? (

@@ -3,6 +3,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  font-family: 'Malgun Gothic', 'Noto Sans KR', sans-serif;
 }
 
 /* 스크롤바 숨기기 (스크롤은 유지) */

@@ -3,8 +3,8 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "일일 업무 현황",
-  description: "사내 인트라넷",
+  title: "히든 시세",
+  description: "국내 상장사 시세를 몰래 확인하세요",
 };
 
 export default function RootLayout({

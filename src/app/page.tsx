@@ -36,7 +36,7 @@ export default function Landing() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // localStorage에서 선택 종목 복원
+  // localStorage에서 선택 종목 복원 (없으면 기본 3종목)
   useEffect(() => {
     try {
       const saved = localStorage.getItem('selectedStocks');
@@ -44,9 +44,15 @@ export default function Landing() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setSelectedStocks(parsed);
+          return;
         }
       }
     } catch {}
+    setSelectedStocks([
+      { name: '삼성전자', code: '005930', market: 'KOSPI' },
+      { name: '카카오', code: '035720', market: 'KOSPI' },
+      { name: 'NAVER', code: '035420', market: 'KOSPI' },
+    ]);
   }, []);
 
   // 선택 종목 변경 시 localStorage에 저장

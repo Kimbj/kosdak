@@ -308,7 +308,7 @@ export default function Landing() {
                 <p className="text-sm text-on-surface-variant mb-4 font-medium">Trending Now</p>
                 <div className="flex flex-wrap gap-2">
                   {['삼성전자', 'NAVER'].map(name => (
-                    <span key={name} className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-medium cursor-pointer hover:opacity-80">
+                    <span key={name} className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-medium cursor-default">
                       {name}
                     </span>
                   ))}
@@ -392,7 +392,7 @@ export default function Landing() {
                     const url = `https://www.applecubic.life/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
                     navigator.clipboard.writeText(url).catch(() => {});
                   }}
-                  className="mt-4 px-4 py-2 bg-surface-container-low rounded-lg text-xs text-on-tertiary-fixed-variant font-mono cursor-pointer hover:bg-surface-container-high transition-colors truncate"
+                  className="mt-4 px-4 py-2 bg-surface-container-low rounded-lg text-xs text-on-tertiary-fixed-variant font-mono cursor-text select-all hover:bg-surface-container-high transition-colors truncate"
                   title="클릭하면 URL이 복사됩니다"
                 >
                   www.applecubic.life/h?codes={selectedStocks.map(s => s.code).join(',')}

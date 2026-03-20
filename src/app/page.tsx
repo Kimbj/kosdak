@@ -454,7 +454,7 @@ export default function Landing() {
             </div>
             <div
               onClick={() => {
-                const url = `https://kosdak.vercel.app/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
+                const url = `https://www.applecubic.life/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
                 navigator.clipboard.writeText(url).catch(() => {});
               }}
               style={{
@@ -469,7 +469,7 @@ export default function Landing() {
               }}
               title="클릭하면 URL이 복사됩니다"
             >
-              kosdak.vercel.app/h?codes={selectedStocks.map(s => s.code).join(',')}
+              www.applecubic.life/h?codes={selectedStocks.map(s => s.code).join(',')}
             </div>
           </div>
         )}

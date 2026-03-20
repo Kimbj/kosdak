@@ -36,7 +36,6 @@ export default function Landing() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // localStorage에서 선택 종목 복원 (없으면 기본 3종목)
   useEffect(() => {
     try {
       const saved = localStorage.getItem('selectedStocks');
@@ -55,7 +54,6 @@ export default function Landing() {
     ]);
   }, []);
 
-  // 선택 종목 변경 시 localStorage에 저장
   useEffect(() => {
     try {
       localStorage.setItem('selectedStocks', JSON.stringify(selectedStocks));
@@ -77,7 +75,6 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, []);
 
-  // Naver 자동완성 API + 디바운스 (서버에서 5분 캐시)
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -164,465 +161,398 @@ export default function Landing() {
     window.location.href = `/h?codes=${codes}`;
   };
 
-  const btnBase: React.CSSProperties = {
-    padding: '9px 18px',
-    fontSize: '13px',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontWeight: 600,
-    transition: 'transform 0.12s, box-shadow 0.12s',
-    letterSpacing: '0.3px',
-  };
-
   return (
-    <div style={{
-      margin: 0,
-      padding: 0,
-      backgroundColor: '#f8f9fa',
-      color: '#333',
-      minHeight: '100vh',
-    }}>
-      {/* 헤더 */}
-      <div style={{ backgroundColor: '#1a2332' }}>
-      <header style={{
-        color: '#fff',
-        padding: '30px 20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        maxWidth: '800px',
-        margin: '0 auto',
-        boxSizing: 'border-box',
-      }}>
-        <div>
-          <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 700 }}>
-            히든 시세
-          </h1>
-          <p style={{ fontSize: '16px', margin: 0, color: '#adb5bd' }}>
-            국내 상장사시세를 몰래 확인하세요
-          </p>
+    <div className="min-h-screen selection:bg-blue-100">
+      {/* Nav */}
+      <nav className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl shadow-[0_8px_24px_rgba(23,28,31,0.04)]">
+        <div className="flex justify-between items-center max-w-7xl mx-auto px-6 h-16">
+          <a className="text-xl font-bold tracking-tighter text-primary-container" href="#">
+            Hidden Price
+          </a>
+          <a
+            href="/download/일일업무현황.zip"
+            download
+            className="flex items-center gap-2 bg-primary-container text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-all active:scale-95"
+          >
+            <span className="material-symbols-outlined text-base">download</span>
+            Get Started
+          </a>
         </div>
-        <a
-          href="/download/일일업무현황.zip"
-          download
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '16px 28px',
-            background: 'linear-gradient(135deg, #4a90d9, #357abd)',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: 600,
-            borderRadius: '10px',
-            textDecoration: 'none',
-            transition: 'transform 0.15s, box-shadow 0.15s',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 4px 12px rgba(74,144,217,0.3)',
-          }}
-          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(74,144,217,0.4)'; }}
-          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.3)'; }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          일일업무현황 다운로드
-        </a>
-      </header>
-      </div>
+      </nav>
 
-      {/* 종목 검색 */}
-      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
-          종목 검색
-        </h2>
-        <div ref={searchRef} style={{ position: 'relative' }}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
-            onKeyDown={(e) => {
-              if (!showResults || searchResults.length === 0) return;
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                setHighlightIndex(prev => {
-                  const next = prev < searchResults.length - 1 ? prev + 1 : 0;
-                  // 스크롤 따라가기
-                  const el = resultsRef.current?.children[next] as HTMLElement;
-                  el?.scrollIntoView({ block: 'nearest' });
-                  return next;
-                });
-              } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                setHighlightIndex(prev => {
-                  const next = prev > 0 ? prev - 1 : searchResults.length - 1;
-                  const el = resultsRef.current?.children[next] as HTMLElement;
-                  el?.scrollIntoView({ block: 'nearest' });
-                  return next;
-                });
-              } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (highlightIndex >= 0 && highlightIndex < searchResults.length) {
-                  addStock(searchResults[highlightIndex]);
-                  setHighlightIndex(-1);
-                }
-              } else if (e.key === 'Escape') {
-                setShowResults(false);
-                setHighlightIndex(-1);
-              }
-            }}
-            placeholder="종목명을 입력하세요 (예: 삼성전자, 카카오)"
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              fontSize: '15px',
-              border: '2px solid #dee2e6',
-              borderRadius: '8px',
-              outline: 'none',
-              boxSizing: 'border-box',
-              transition: 'border-color 0.2s',
-              backgroundColor: '#fff',
-            }}
-            onFocusCapture={(e) => (e.currentTarget.style.borderColor = '#4a90d9')}
-            onBlurCapture={(e) => (e.currentTarget.style.borderColor = '#dee2e6')}
-          />
-          {showResults && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              backgroundColor: '#fff',
-              borderRadius: '0 0 8px 8px',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-              zIndex: 100,
-              maxHeight: '320px',
-              overflowY: 'auto',
-              border: '1px solid #dee2e6',
-              borderTop: 'none',
-            }}>
-              {isSearching ? (
-                <div style={{ padding: '16px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
-                  검색 중...
-                </div>
-              ) : searchResults.length === 0 ? (
-                <div style={{ padding: '16px', textAlign: 'center', color: '#999', fontSize: '14px' }}>
-                  검색 결과가 없습니다
-                </div>
-              ) : (
-                <div ref={resultsRef}>
-                {searchResults.map((item, idx) => {
-                  const alreadySelected = selectedStocks.some(s => s.code === item.code);
-                  const isHighlighted = idx === highlightIndex;
-                  return (
-                    <div
-                      key={item.code}
-                      onClick={() => addStock(item)}
-                      onMouseEnter={() => setHighlightIndex(idx)}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '12px 16px',
-                        color: alreadySelected ? '#adb5bd' : '#333',
-                        borderBottom: '1px solid #f1f3f5',
-                        cursor: alreadySelected ? 'default' : 'pointer',
-                        backgroundColor: isHighlighted ? '#e9ecef' : alreadySelected ? '#f8f9fa' : '#fff',
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontSize: '15px', fontWeight: 600 }}>{item.name}</span>
-                        <span style={{
-                          marginLeft: '10px',
-                          fontSize: '13px',
-                          color: '#868e96',
-                          fontFamily: 'monospace',
-                        }}>{item.code}</span>
-                        {alreadySelected && (
-                          <span style={{ marginLeft: '8px', fontSize: '12px', color: '#adb5bd' }}>추가됨</span>
-                        )}
-                      </div>
-                      {item.market && (
-                        <span style={{
-                          fontSize: '12px',
-                          color: '#fff',
-                          backgroundColor: item.market === 'KOSPI' ? '#4a90d9' : '#e67e22',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          fontWeight: 500,
-                        }}>{item.market}</span>
+      <main className="pt-16">
+        {/* Hero */}
+        <section className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 hero-pattern">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-surface/40 to-surface" />
+          <div className="relative max-w-7xl mx-auto px-6 text-center">
+            <div className="inline-flex items-center py-1 px-4 rounded-full bg-secondary-container/50 border border-on-secondary-container/10 text-on-secondary-container text-xs font-semibold mb-10 tracking-wider uppercase backdrop-blur-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-container mr-2 animate-pulse" />
+              Institutional Grade Tools
+            </div>
+            <h1 className="text-5xl md:text-8xl font-black tracking-tight text-on-surface mb-8 leading-[1.05]">
+              히든 시세<br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-on-primary-container">
+                Hidden Price
+              </span>
+            </h1>
+            <p className="text-base md:text-xl text-on-surface-variant/80 max-w-3xl mx-auto mb-12 leading-relaxed font-medium tracking-tight">
+              현명한 투자자의 선택, 실시간 시세를 몰래 확인하세요.<br className="hidden md:block" />
+              업무 중에도 안전하고 조용하게 데이터를 관리하는 금융 센티넬.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/download/일일업무현황.zip"
+                download
+                className="flex items-center justify-center gap-2 bg-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-container/20 transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined">download</span>
+                일일업무현황 다운로드
+              </a>
+              <a
+                href="#search"
+                className="flex items-center justify-center gap-2 border border-outline-variant bg-white/50 backdrop-blur-sm text-on-surface px-10 py-5 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-all active:scale-95"
+              >
+                Learn More
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Search & Selection Bento */}
+        <section id="search" className="max-w-7xl mx-auto px-6 -mt-12 relative z-10 mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Search */}
+            <div className="md:col-span-1 bg-surface-container-lowest p-8 rounded-xl shadow-[0_8px_32px_rgba(23,28,31,0.06)] border border-outline-variant/10 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xl font-bold mb-4">Stock Search</h3>
+                <div ref={searchRef} className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    onFocus={() => { if (searchResults.length > 0) setShowResults(true); }}
+                    onKeyDown={(e) => {
+                      if (!showResults || searchResults.length === 0) return;
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setHighlightIndex(prev => {
+                          const next = prev < searchResults.length - 1 ? prev + 1 : 0;
+                          const el = resultsRef.current?.children[next] as HTMLElement;
+                          el?.scrollIntoView({ block: 'nearest' });
+                          return next;
+                        });
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setHighlightIndex(prev => {
+                          const next = prev > 0 ? prev - 1 : searchResults.length - 1;
+                          const el = resultsRef.current?.children[next] as HTMLElement;
+                          el?.scrollIntoView({ block: 'nearest' });
+                          return next;
+                        });
+                      } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (highlightIndex >= 0 && highlightIndex < searchResults.length) {
+                          addStock(searchResults[highlightIndex]);
+                          setHighlightIndex(-1);
+                        }
+                      } else if (e.key === 'Escape') {
+                        setShowResults(false);
+                        setHighlightIndex(-1);
+                      }
+                    }}
+                    placeholder="종목명 또는 코드 입력"
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-3 px-4 pl-12 focus:outline-none focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
+                  />
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+                    search
+                  </span>
+
+                  {showResults && (
+                    <div className="absolute top-full left-0 right-0 bg-white rounded-b-lg shadow-lg z-50 max-h-80 overflow-y-auto border border-outline-variant/20 border-t-0">
+                      {isSearching ? (
+                        <div className="p-4 text-center text-on-surface-variant text-sm">검색 중...</div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="p-4 text-center text-on-surface-variant text-sm">검색 결과가 없습니다</div>
+                      ) : (
+                        <div ref={resultsRef}>
+                          {searchResults.map((item, idx) => {
+                            const alreadySelected = selectedStocks.some(s => s.code === item.code);
+                            const isHighlighted = idx === highlightIndex;
+                            return (
+                              <div
+                                key={item.code}
+                                onClick={() => addStock(item)}
+                                onMouseEnter={() => setHighlightIndex(idx)}
+                                className={`flex justify-between items-center px-4 py-3 cursor-pointer border-b border-surface-container-high/50 last:border-b-0 transition-colors ${
+                                  isHighlighted ? 'bg-surface-container-high' : alreadySelected ? 'bg-surface-container-low opacity-50' : 'hover:bg-surface-container-low'
+                                }`}
+                              >
+                                <div>
+                                  <span className="font-semibold text-sm">{item.name}</span>
+                                  <span className="ml-2 text-xs font-mono text-on-surface-variant">{item.code}</span>
+                                  {alreadySelected && <span className="ml-2 text-xs text-on-surface-variant">추가됨</span>}
+                                </div>
+                                {item.market && (
+                                  <span className={`text-[10px] text-white px-2 py-0.5 rounded font-medium ${
+                                    item.market === 'KOSPI' ? 'bg-primary-container' : 'bg-orange-500'
+                                  }`}>
+                                    {item.market}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
-                  );
-                })}
+                  )}
+                </div>
+              </div>
+              <div className="mt-8">
+                <p className="text-sm text-on-surface-variant mb-4 font-medium">Trending Now</p>
+                <div className="flex flex-wrap gap-2">
+                  {['삼성전자', 'カカオ', 'NAVER'].map(name => (
+                    <span key={name} className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-medium cursor-pointer hover:opacity-80">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Items */}
+            <div className="md:col-span-2 bg-surface-container-lowest p-8 rounded-xl shadow-[0_8px_32px_rgba(23,28,31,0.06)] border border-outline-variant/10">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Selected Items</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={openCodeEditor}
+                    className="p-2 hover:bg-surface-container-highest rounded transition-colors text-on-surface-variant"
+                    title="코드 편집"
+                  >
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                  <button
+                    onClick={copyCodeList}
+                    className="p-2 hover:bg-surface-container-highest rounded transition-colors text-on-surface-variant"
+                    title="코드 복사"
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {copied ? 'check' : 'content_copy'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={viewQuotes}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary rounded-lg text-xs font-bold hover:opacity-90 active:scale-95 transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">visibility</span>
+                    View
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {selectedStocks.map((item) => (
+                  <div
+                    key={item.code}
+                    className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-surface-container-low rounded-lg group transition-all hover:shadow-sm"
+                  >
+                    <div className="flex items-center gap-4 mb-2 md:mb-0">
+                      <div className="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-on-primary text-lg">monitoring</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-on-surface text-sm">{item.name || `종목 ${item.code}`}</h4>
+                        <p className="text-xs font-mono text-on-surface-variant tracking-widest">{item.code}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {item.market && (
+                        <span className={`text-[10px] text-white px-2 py-0.5 rounded font-medium ${
+                          item.market === 'KOSPI' ? 'bg-primary-container' : 'bg-orange-500'
+                        }`}>
+                          {item.market}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => removeStock(item.code)}
+                        className="p-1.5 hover:bg-red-50 rounded transition-colors text-on-surface-variant hover:text-red-500"
+                      >
+                        <span className="material-symbols-outlined text-lg">close</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {selectedStocks.length === 0 && (
+                  <div className="flex items-center justify-center p-8 border-2 border-dashed border-outline-variant/20 rounded-lg">
+                    <p className="text-sm text-on-surface-variant italic">Add stocks to monitor hidden feeds</p>
+                  </div>
+                )}
+              </div>
+
+              {selectedStocks.length > 0 && (
+                <div
+                  onClick={() => {
+                    const url = `https://www.applecubic.life/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
+                    navigator.clipboard.writeText(url).catch(() => {});
+                  }}
+                  className="mt-4 px-4 py-2 bg-surface-container-low rounded-lg text-xs text-on-tertiary-fixed-variant font-mono cursor-pointer hover:bg-surface-container-high transition-colors truncate"
+                  title="클릭하면 URL이 복사됩니다"
+                >
+                  www.applecubic.life/h?codes={selectedStocks.map(s => s.code).join(',')}
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        </section>
 
-        {/* 선택된 종목 리스트 */}
-        {selectedStocks.length > 0 && (
-          <div style={{
-            marginTop: '16px',
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 16px',
-              backgroundColor: '#1a2332',
-              color: '#fff',
-            }}>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>
-                선택 종목 ({selectedStocks.length}개)
-              </span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={openCodeEditor}
-                  style={{ ...btnBase, background: 'linear-gradient(135deg, #495057, #343a40)', color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)'; }}
-                >
-                  코드 편집
-                </button>
-                <button
-                  onClick={copyCodeList}
-                  style={{ ...btnBase, background: 'linear-gradient(135deg, #868e96, #6c757d)', color: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.12)' }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.18)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)'; }}
-                >
-                  {copied ? '복사됨!' : '코드 복사'}
-                </button>
-                <button
-                  onClick={viewQuotes}
-                  style={{ ...btnBase, background: 'linear-gradient(135deg, #4a90d9, #357abd)', color: '#fff', boxShadow: '0 2px 8px rgba(74,144,217,0.3)' }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.4)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,144,217,0.3)'; }}
-                >
-                  시세 조회
-                </button>
-              </div>
+        {/* Core Advantage */}
+        <section className="bg-surface-container-low py-24">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-extrabold tracking-tight mb-4">Core Advantage</h2>
+              <p className="text-on-surface-variant max-w-xl mx-auto">
+                더욱 강력해진 보안과 정확도, 히든 시세만의 독자적인 기술력입니다.
+              </p>
             </div>
-            <div>
-              {selectedStocks.map((item, idx) => (
-                <div
-                  key={item.code}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '10px 16px',
-                    borderBottom: idx < selectedStocks.length - 1 ? '1px solid #f1f3f5' : 'none',
-                    fontSize: '14px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ color: '#adb5bd', fontSize: '12px', minWidth: '20px' }}>{idx + 1}</span>
-                    <span style={{ fontWeight: 600 }}>{item.name || `종목 ${item.code}`}</span>
-                    <span style={{ color: '#868e96', fontFamily: 'monospace', fontSize: '13px' }}>{item.code}</span>
-                    {item.market && (
-                      <span style={{
-                        fontSize: '11px',
-                        color: '#fff',
-                        backgroundColor: item.market === 'KOSPI' ? '#4a90d9' : '#e67e22',
-                        padding: '1px 6px',
-                        borderRadius: '3px',
-                      }}>{item.market}</span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => removeStock(item.code)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#dee2e6',
-                      fontSize: '18px',
-                      cursor: 'pointer',
-                      padding: '0 4px',
-                      lineHeight: 1,
-                    }}
-                    onMouseOver={(e) => (e.currentTarget.style.color = '#e03131')}
-                    onMouseOut={(e) => (e.currentTarget.style.color = '#dee2e6')}
-                  >
-                    x
-                  </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Real-time */}
+              <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-[0_8px_24px_rgba(23,28,31,0.02)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 bg-on-tertiary-fixed-variant/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-on-tertiary-fixed-variant" style={{ fontVariationSettings: "'FILL' 1" }}>update</span>
                 </div>
-              ))}
-            </div>
-            <div
-              onClick={() => {
-                const url = `https://www.applecubic.life/h?codes=${selectedStocks.map(s => s.code).join(',')}`;
-                navigator.clipboard.writeText(url).catch(() => {});
-              }}
-              style={{
-                padding: '10px 16px',
-                backgroundColor: '#f8f9fa',
-                fontSize: '12px',
-                color: '#4a90d9',
-                fontFamily: 'monospace',
-                borderTop: '1px solid #f1f3f5',
-                cursor: 'pointer',
-                userSelect: 'all',
-              }}
-              title="클릭하면 URL이 복사됩니다"
-            >
-              www.applecubic.life/h?codes={selectedStocks.map(s => s.code).join(',')}
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* 서비스 소개 */}
-      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
-          서비스 소개
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          {[
-            { title: '실시간 시세', desc: '국내 상장사 시세를 60초마다 자동 갱신합니다. 사내 방화벽에 막혀 증권사이트 접속이 불가해도 조회됩니다.' },
-            { title: '몰래 확인', desc: '빈 페이지처럼 보이지만 Ctrl+A를 누르면 시세가 나타납니다. 다른 분들의 눈에 띄지 않게 확인할 수 있습니다.' },
-            { title: '무료 서비스', desc: '회원가입 없이 누구나 무료로 이용할 수 있습니다. 종목 코드만 입력하면 바로 조회됩니다.' },
-          ].map((card) => (
-            <div key={card.title} style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              padding: '24px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            }}>
-              <h3 style={{ fontSize: '16px', margin: '0 0 8px 0', color: '#1a2332' }}>{card.title}</h3>
-              <p style={{ fontSize: '14px', margin: 0, color: '#666', lineHeight: '1.6' }}>{card.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 사용 방법 */}
-      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
-        <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#1a2332' }}>
-          사용 방법
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          {/* 웹 사용 */}
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '10px',
-            padding: '24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            borderTop: '3px solid #4a90d9',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '8px',
-                background: 'linear-gradient(135deg, #4a90d9, #357abd)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
+                <h4 className="text-xl font-bold mb-3">Real-time Quotes</h4>
+                <p className="text-on-surface-variant text-sm leading-relaxed">
+                  60초 간격의 정교한 데이터 동기화를 통해 가장 신선한 시장 정보를 제공합니다. 사내 방화벽에 막혀도 정상 조회됩니다.
+                </p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1a2332' }}>웹 사용</h3>
-            </div>
-            <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.9' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>1.</span>
-                <span>모니터링 하고 싶은 종목을 검색하여 선택합니다.</span>
+              {/* Discreet - highlighted */}
+              <div className="bg-primary-container p-8 rounded-xl shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>enhanced_encryption</span>
+                </div>
+                <h4 className="text-xl font-bold mb-3 text-white">Discreet Check</h4>
+                <p className="text-on-primary-container text-sm leading-relaxed brightness-150">
+                  업계 유일의 &apos;Ctrl+A&apos; 히든 텍스트 기술을 적용했습니다. 전체 선택 시에만 드러나는 실시간 데이터 보안을 경험하세요.
+                </p>
               </div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>2.</span>
-                <span><strong style={{ color: '#1a2332' }}>시세 조회</strong> 버튼을 눌러 이동합니다.</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <span style={{ color: '#4a90d9', fontWeight: 700, flexShrink: 0 }}>3.</span>
-                <span>빈 페이지로 보이지만 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>Ctrl + A</kbd>를 누르면 시세가 보입니다.</span>
+              {/* Free */}
+              <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-[0_8px_24px_rgba(23,28,31,0.02)] hover:-translate-y-1 transition-all duration-300">
+                <div className="w-12 h-12 bg-on-tertiary-fixed-variant/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-on-tertiary-fixed-variant" style={{ fontVariationSettings: "'FILL' 1" }}>free_cancellation</span>
+                </div>
+                <h4 className="text-xl font-bold mb-3">Free Service</h4>
+                <p className="text-on-surface-variant text-sm leading-relaxed">
+                  복잡한 회원가입이나 개인정보 요구 없이 누구나 즉시 사용할 수 있는 공익적 금융 도구를 지향합니다.
+                </p>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* 프로그램 사용 */}
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '10px',
-            padding: '24px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            borderTop: '3px solid #1a2332',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '8px',
-                background: 'linear-gradient(135deg, #495057, #343a40)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
-              </div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1a2332' }}>프로그램 사용</h3>
+        {/* How to Utilize */}
+        <section className="max-w-7xl mx-auto px-6 py-24">
+          <h2 className="text-3xl font-extrabold tracking-tight mb-12">How to Utilize</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Web */}
+            <div className="p-8 bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-sm">
+              <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <span className="text-primary-container font-black">01</span> Web Interface
+              </h3>
+              <ul className="space-y-6">
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-surface-container-highest text-[10px] flex items-center justify-center font-bold">1</span>
+                  <p className="text-sm text-on-surface">종목 검색창에서 관심 있는 주식명을 입력하여 선택합니다.</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-surface-container-highest text-[10px] flex items-center justify-center font-bold">2</span>
+                  <p className="text-sm text-on-surface">생성된 시세 카드에서 &apos;View&apos; 버튼을 눌러 시세 창을 엽니다.</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-surface-container-highest text-[10px] flex items-center justify-center font-bold">3</span>
+                  <p className="text-sm text-on-surface">
+                    숨겨진 시세를 확인하려면 페이지에서 <kbd className="px-2 py-1 bg-surface-container-highest rounded font-mono text-[10px]">Ctrl+A</kbd>를 누르세요.
+                  </p>
+                </li>
+              </ul>
             </div>
-            <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.9' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>1.</span>
-                <span>웹에서 <strong style={{ color: '#1a2332' }}>코드 복사</strong>를 누릅니다.</span>
+            {/* Program */}
+            <div className="p-8 bg-tertiary-container rounded-xl shadow-lg text-white">
+              <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                <span className="text-on-tertiary-container font-black">02</span> Enterprise Sync
+              </h3>
+              <ul className="space-y-6">
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 text-[10px] flex items-center justify-center font-bold">1</span>
+                  <p className="text-sm text-on-primary-container brightness-150">웹에서 코드 복사 버튼을 눌러 종목 코드를 복사합니다.</p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 text-[10px] flex items-center justify-center font-bold">2</span>
+                  <p className="text-sm text-on-primary-container brightness-150">
+                    프로그램에서 <kbd className="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">I</kbd> 키를 누른 후 <kbd className="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">Ctrl+V</kbd>로 붙여넣기 합니다.
+                  </p>
+                </li>
+                <li className="flex gap-4">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 text-[10px] flex items-center justify-center font-bold">3</span>
+                  <p className="text-sm text-on-primary-container brightness-150">
+                    <kbd className="px-2 py-0.5 bg-white/10 rounded font-mono text-[10px]">A</kbd> 키를 누르면 시세가 표시되고, 5초 뒤 자동으로 사라집니다.
+                  </p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Security Preview */}
+        <section className="max-w-7xl mx-auto px-6 mb-24">
+          <div className="bg-surface-container-lowest border border-outline-variant/15 p-12 rounded-2xl text-center">
+            <h3 className="text-2xl font-bold mb-6">Security Interface Preview</h3>
+            <div className="max-w-md mx-auto p-12 bg-tertiary-container rounded-xl mb-6 relative overflow-hidden shadow-2xl">
+              <p className="text-xs text-on-primary-container/40 uppercase tracking-[0.2em] mb-4">Current Ticker Status</p>
+              <div className="text-4xl font-mono font-bold text-white selection:bg-white selection:text-primary-container">
+                <span className="hidden-value-blur">&#8361;54,200</span>
               </div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>2.</span>
-                <span>프로그램에서 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>I</kbd> 키를 누른 후 <kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>Ctrl + V</kbd>로 붙여넣기 합니다.</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>3.</span>
-                <span><kbd style={{ fontFamily: 'monospace', backgroundColor: '#e9ecef', padding: '2px 7px', borderRadius: '4px', border: '1px solid #dee2e6', fontSize: '12px', fontWeight: 600 }}>A</kbd> 키를 누르면 시세가 표시됩니다.</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <span style={{ color: '#495057', fontWeight: 700, flexShrink: 0 }}>4.</span>
-                <span>노출된 시세는 5초 뒤 자동으로 사라집니다.</span>
-              </div>
+              <p className="text-[10px] mt-8 text-on-primary-container/60">
+                Hover to unblur or use <span className="font-bold underline">Select All</span> to decrypt
+              </p>
+            </div>
+            <p className="text-sm text-on-surface-variant">
+              Your data remains in a high-entropy secure state until you explicitly request access.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-surface-container-highest/15 bg-surface">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-start gap-8">
+          <div className="max-w-xs">
+            <span className="text-lg font-bold text-primary-container mb-4 block">Hidden Price</span>
+            <p className="text-xs md:text-sm leading-relaxed text-on-surface-variant opacity-80">
+              &copy; 2024 Hidden Price (히든 시세). All rights reserved. Data provided by Daum Finance.
+              투자에 대한 책임은 본인에게 있습니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-12">
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-bold text-primary-container uppercase tracking-wider">Resources</p>
+              <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="#">Terms of Service</a>
+              <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="#">Privacy Policy</a>
+            </div>
+            <div className="flex flex-col gap-3">
+              <p className="text-xs font-bold text-primary-container uppercase tracking-wider">Contact</p>
+              <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="mailto:applecubic3@gmail.com">
+                applecubic3@gmail.com
+              </a>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* 푸터 */}
-      <footer style={{
-        textAlign: 'center',
-        padding: '30px 20px',
-        color: '#999',
-        fontSize: '12px',
-        marginTop: '40px',
-      }}>
-        <p style={{ margin: 0 }}>투자에 대한 책임은 본인에게 있습니다.</p>
-        <p style={{ margin: '5px 0 0 0' }}>데이터 출처: Daum Finance</p>
-        <p style={{ margin: '12px 0 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
-          </svg>
-          <span>문의사항:</span>
-          <a href="mailto:applecubic3@gmail.com" style={{ color: '#4a90d9', textDecoration: 'none' }}>applecubic3@gmail.com</a>
-        </p>
       </footer>
 
       {/* 코드 편집 모달 */}
       {showCodeEditor && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000]"
           onMouseDown={(e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDivElement).dataset.bg = '1'; }}
           onMouseUp={(e) => {
             const el = e.currentTarget as HTMLDivElement;
@@ -630,72 +560,29 @@ export default function Landing() {
             delete el.dataset.bg;
           }}
         >
-          <div style={{
-            backgroundColor: '#fff',
-            borderRadius: '8px',
-            width: '400px',
-            maxWidth: '90vw',
-            maxHeight: '80vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-          }}>
-            <div style={{
-              padding: '16px 20px',
-              borderBottom: '1px solid #dee2e6',
-            }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#1a2332' }}>코드 편집</h3>
-              <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: '#868e96' }}>
-                한 줄에 하나씩 코드를 입력하세요 (예: 005930)
-              </p>
+          <div className="bg-white rounded-xl w-[400px] max-w-[90vw] max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="p-5 border-b border-surface-container-highest">
+              <h3 className="text-lg font-bold text-on-surface">코드 편집</h3>
+              <p className="mt-1 text-sm text-on-surface-variant">한 줄에 하나씩 코드를 입력하세요 (예: 005930)</p>
             </div>
-            <div style={{ padding: '16px 20px', flex: 1 }}>
+            <div className="p-5 flex-1">
               <textarea
                 value={codeEditorText}
                 onChange={(e) => setCodeEditorText(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: '280px',
-                  padding: '12px',
-                  fontSize: '14px',
-                  fontFamily: 'monospace',
-                  border: '1px solid #dee2e6',
-                  borderRadius: '6px',
-                  outline: 'none',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                  lineHeight: '1.8',
-                }}
+                className="w-full h-70 p-3 text-sm font-mono border border-outline-variant/30 rounded-lg outline-none resize-y leading-7 focus:ring-2 focus:ring-primary-container/20"
                 placeholder={'005930\n000660\n035720'}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4a90d9')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#dee2e6')}
               />
             </div>
-            <div style={{
-              padding: '12px 20px',
-              borderTop: '1px solid #dee2e6',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '8px',
-            }}>
+            <div className="p-4 border-t border-surface-container-highest flex justify-end gap-3">
               <button
                 onClick={() => setShowCodeEditor(false)}
-                style={{
-                  ...btnBase,
-                  backgroundColor: '#fff',
-                  color: '#495057',
-                  border: '1px solid #dee2e6',
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
-                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; }}
+                className="px-5 py-2.5 text-sm font-semibold text-on-surface-variant border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={saveCodeEditor}
-                style={{ ...btnBase, background: 'linear-gradient(135deg, #4a90d9, #357abd)', color: '#fff', boxShadow: '0 2px 8px rgba(74,144,217,0.3)' }}
-                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(74,144,217,0.4)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74,144,217,0.3)'; }}
+                className="px-5 py-2.5 text-sm font-bold text-on-primary bg-primary-container rounded-lg hover:opacity-90 active:scale-95 transition-all"
               >
                 저장
               </button>

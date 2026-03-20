@@ -42,8 +42,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ fontFamily: 'Gulim, Arial, sans-serif', fontSize: '12px', color: '#fff', backgroundColor: '#fff', padding: '10px', overflow: 'hidden', minHeight: '100vh' }}>
-      <h3 style={{ fontSize: '14px', margin: '0 0 10px 0', fontWeight: 'normal' }}>업무 참조용 지표 데이터</h3>
+    <div style={{ fontFamily: "'Malgun Gothic', 'Noto Sans KR', sans-serif", fontSize: '13px', color: '#fff', backgroundColor: '#fff', padding: '10px', overflow: 'hidden', minHeight: '100vh' }}>
+      <h3 style={{ fontSize: '15px', margin: '0 0 10px 0', fontWeight: 'normal' }}>업무 참조용 지표 데이터</h3>
       
       {error && !data ? (
         <div>{error}</div>
@@ -84,7 +84,7 @@ export default function Home() {
               })}
             </tbody>
           </table>
-          <div style={{ marginTop: '5px', color: '#fff', fontSize: '11px' }}>
+          <div style={{ marginTop: '5px', color: '#fff', fontSize: '12px' }}>
             갱신시각: {data.updatedAt}
           </div>
         </div>

@@ -37,7 +37,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchQuote();
-    const interval = setInterval(fetchQuote, 5000);
+    const interval = setInterval(fetchQuote, 60000);
     return () => clearInterval(interval);
   }, []);
 

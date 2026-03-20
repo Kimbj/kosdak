@@ -500,6 +500,23 @@ export default function Landing() {
         </section>
       </main>
 
+      {/* 광고 */}
+      <section className="max-w-7xl mx-auto px-6 mb-12">
+        <ins
+          className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client="ca-pub-5533017880847916"
+          data-ad-slot="1744419630"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
+          }}
+        />
+      </section>
+
       {/* Footer */}
       <footer className="w-full border-t border-surface-container-highest/15 bg-surface">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-start gap-8">

@@ -175,42 +175,38 @@ export default function Landing() {
             className="flex items-center gap-2 bg-primary-container text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:opacity-90 transition-all active:scale-95"
           >
             <span className="material-symbols-outlined text-base">download</span>
-            Get Started
+            일일업무현황 다운로드
           </a>
         </div>
       </nav>
 
       <main className="pt-16">
         {/* Hero */}
-        <section className="relative overflow-hidden pt-24 pb-32 md:pt-32 md:pb-40 hero-pattern">
+        <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-24 hero-pattern">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-surface/40 to-surface" />
           <div className="relative max-w-7xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center py-1 px-4 rounded-full bg-secondary-container/50 border border-on-secondary-container/10 text-on-secondary-container text-xs font-semibold mb-10 tracking-wider uppercase backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-container mr-2 animate-pulse" />
-              Institutional Grade Tools
-            </div>
-            <h1 className="text-5xl md:text-8xl font-black tracking-tight text-on-surface mb-8 leading-[1.05]">
-              히든 시세<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-on-primary-container">
+            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-on-surface mb-4 leading-[1.05]">
+              히든 시세
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-container to-on-primary-container ml-3">
                 Hidden Price
               </span>
             </h1>
-            <p className="text-base md:text-xl text-on-surface-variant/80 max-w-3xl mx-auto mb-12 leading-relaxed font-medium tracking-tight">
-              현명한 투자자의 선택, 실시간 시세를 몰래 확인하세요.<br className="hidden md:block" />
+            <p className="text-sm md:text-base text-on-surface-variant/80 max-w-2xl mx-auto mb-8 leading-relaxed font-medium tracking-tight">
+              현명한 투자자의 선택, 실시간 시세를 몰래 확인하세요.
               업무 중에도 안전하고 조용하게 데이터를 관리하는 금융 센티넬.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="/download/일일업무현황.zip"
                 download
-                className="flex items-center justify-center gap-2 bg-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-primary-container/20 transition-all active:scale-95"
+                className="flex items-center justify-center gap-2 bg-primary-container text-on-primary px-8 py-3.5 rounded-xl font-bold text-sm hover:shadow-2xl hover:shadow-primary-container/20 transition-all active:scale-95"
               >
-                <span className="material-symbols-outlined">download</span>
+                <span className="material-symbols-outlined text-lg">download</span>
                 일일업무현황 다운로드
               </a>
               <a
-                href="#search"
-                className="flex items-center justify-center gap-2 border border-outline-variant bg-white/50 backdrop-blur-sm text-on-surface px-10 py-5 rounded-xl font-bold text-lg hover:bg-surface-container-low transition-all active:scale-95"
+                href="#features"
+                className="flex items-center justify-center gap-2 border border-outline-variant bg-white/50 backdrop-blur-sm text-on-surface px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-container-low transition-all active:scale-95"
               >
                 Learn More
               </a>
@@ -219,7 +215,7 @@ export default function Landing() {
         </section>
 
         {/* Search & Selection Bento */}
-        <section id="search" className="max-w-7xl mx-auto px-6 -mt-12 relative z-10 mb-24">
+        <section id="search" className="max-w-7xl mx-auto px-6 -mt-8 relative z-10 mb-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Search */}
             <div className="md:col-span-1 bg-surface-container-lowest p-8 rounded-xl shadow-[0_8px_32px_rgba(23,28,31,0.06)] border border-outline-variant/10 flex flex-col justify-between">
@@ -311,7 +307,7 @@ export default function Landing() {
               <div className="mt-8">
                 <p className="text-sm text-on-surface-variant mb-4 font-medium">Trending Now</p>
                 <div className="flex flex-wrap gap-2">
-                  {['삼성전자', 'カカオ', 'NAVER'].map(name => (
+                  {['삼성전자', 'NAVER'].map(name => (
                     <span key={name} className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-medium cursor-pointer hover:opacity-80">
                       {name}
                     </span>
@@ -502,25 +498,6 @@ export default function Landing() {
             </div>
           </div>
         </section>
-
-        {/* Security Preview */}
-        <section className="max-w-7xl mx-auto px-6 mb-24">
-          <div className="bg-surface-container-lowest border border-outline-variant/15 p-12 rounded-2xl text-center">
-            <h3 className="text-2xl font-bold mb-6">Security Interface Preview</h3>
-            <div className="max-w-md mx-auto p-12 bg-tertiary-container rounded-xl mb-6 relative overflow-hidden shadow-2xl">
-              <p className="text-xs text-on-primary-container/40 uppercase tracking-[0.2em] mb-4">Current Ticker Status</p>
-              <div className="text-4xl font-mono font-bold text-white selection:bg-white selection:text-primary-container">
-                <span className="hidden-value-blur">&#8361;54,200</span>
-              </div>
-              <p className="text-[10px] mt-8 text-on-primary-container/60">
-                Hover to unblur or use <span className="font-bold underline">Select All</span> to decrypt
-              </p>
-            </div>
-            <p className="text-sm text-on-surface-variant">
-              Your data remains in a high-entropy secure state until you explicitly request access.
-            </p>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
@@ -529,16 +506,11 @@ export default function Landing() {
           <div className="max-w-xs">
             <span className="text-lg font-bold text-primary-container mb-4 block">Hidden Price</span>
             <p className="text-xs md:text-sm leading-relaxed text-on-surface-variant opacity-80">
-              &copy; 2024 Hidden Price (히든 시세). All rights reserved. Data provided by Daum Finance.
+              &copy; 2024 Hidden Price (히든 시세). All rights reserved. Data provided by Daum Finance.<br />
               투자에 대한 책임은 본인에게 있습니다.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-12">
-            <div className="flex flex-col gap-3">
-              <p className="text-xs font-bold text-primary-container uppercase tracking-wider">Resources</p>
-              <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="#">Terms of Service</a>
-              <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="#">Privacy Policy</a>
-            </div>
+          <div className="grid grid-cols-2 gap-12">        
             <div className="flex flex-col gap-3">
               <p className="text-xs font-bold text-primary-container uppercase tracking-wider">Contact</p>
               <a className="text-xs md:text-sm text-on-surface-variant opacity-80 hover:opacity-100 hover:text-primary-container transition-opacity" href="mailto:applecubic3@gmail.com">

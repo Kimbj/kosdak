@@ -488,11 +488,9 @@ export default function Landing() {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           {[
-            { title: '실시간 시세', desc: '국내 상장사 시세를 실시간으로 확인할 수 있습니다. 60초마다 자동 갱신됩니다.' },
-            { title: '간편한 조회', desc: '종목 코드만 입력하면 원하는 종목의 시세를 바로 확인할 수 있습니다.' },
-            { title: '무료 서비스', desc: '별도의 회원가입 없이 누구나 무료로 이용할 수 있습니다.' },
-            { title: '방화벽 우회', desc: '사내 방화벽에 막혀 국내주식 조회가 불가한 경우 확인이 됩니다.' },
-            { title: '몰래 확인', desc: '다른 분들의 눈에 띄지 않게 몰래 확인할 수 있습니다.' },
+            { title: '실시간 시세', desc: '국내 상장사 시세를 60초마다 자동 갱신합니다. 사내 방화벽에 막혀 증권사이트 접속이 불가해도 조회됩니다.' },
+            { title: '몰래 확인', desc: '빈 페이지처럼 보이지만 Ctrl+A를 누르면 시세가 나타납니다. 다른 분들의 눈에 띄지 않게 확인할 수 있습니다.' },
+            { title: '무료 서비스', desc: '회원가입 없이 누구나 무료로 이용할 수 있습니다. 종목 코드만 입력하면 바로 조회됩니다.' },
           ].map((card) => (
             <div key={card.title} style={{
               backgroundColor: '#fff',
@@ -589,23 +587,6 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* 광고 */}
-      <section style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block' }}
-          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-          data-ad-slot="XXXXXXXXXX"
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: '(adsbygoogle = window.adsbygoogle || []).push({});',
-          }}
-        />
       </section>
 
       {/* 푸터 */}

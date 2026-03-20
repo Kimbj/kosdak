@@ -211,6 +211,9 @@ export default function Landing() {
                 Learn More
               </a>
             </div>
+            <p className="text-xs text-on-surface-variant/50 mt-4">
+              Windows SmartScreen 경고 시 &apos;추가 정보&apos; → &apos;실행&apos;을 클릭하세요
+            </p>
           </div>
         </section>
 
